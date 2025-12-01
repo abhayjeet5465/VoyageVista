@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2563EB;
+  --color-secondary: #FBBF24;
+}
+.nav-logo {
+    height: 42px;      /* B: slightly larger than default */
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+* {
+  font-family: Outfit;
+}
+
+.font-playfair {
+  font-family: Playfair !important;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.7s ease-out; }
+
+@keyframes fadeInSlow {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInSlow { animation: fadeInSlow 1.2s ease-out; }

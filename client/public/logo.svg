@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="56" viewBox="0 0 260 56" role="img" aria-label="VoyageVista logo">
+  <title>VoyageVista</title>
+  <!-- Transparent background -->
+  <rect width="100%" height="100%" fill="none"/>
+  <!-- Text: semi-rounded premium style -->
+  <text x="8" y="40"
+        font-family="Poppins, 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif"
+        font-weight="600"
+        font-size="34"
+        letter-spacing="0.6"
+        fill="#FFFFFF">
+    VoyageVista
+  </text>
+</svg>
