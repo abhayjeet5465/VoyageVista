@@ -1,105 +1,107 @@
-VoyageVista 
+VoyageVista
+Role-based travel booking application with AI-generated itineraries
 
-Role-Based Travel Booking Platform with AI-Generated Itineraries
+VoyageVista is a full-stack travel booking web application.
+Travellers can book hotels and generate AI-based travel itineraries.
+Hotel owners can manage hotels, rooms, and view bookings using a separate role-based interface.
 
-VoyageVista is a full-stack travel booking web application that allows travellers to book hotels and receive AI-generated, day-by-day travel itineraries, while enabling hotel owners to manage properties and bookings through a separate role-based interface.
+The AI itinerary generation is implemented on the backend using a Hugging Face LLaMA instruction model and real booking data.
 
-The project integrates a Hugging Face LLaMA instruction model on the backend to generate itineraries using real booking data.
+What this project does
 
-Overview
+The application models a basic travel booking system with two types of users and a simple AI feature layered on top.
 
-VoyageVista demonstrates a complete end-to-end system involving:
+Main ideas behind the project:
 
-Role-based authentication (Traveller / Hotel Owner)
+Keep roles clearly separated (traveller vs hotel owner)
 
-Hotel, room, and booking management
+Handle bookings in a realistic way
 
-Secure backend-driven AI integration
+Integrate AI without exposing keys or logic to the frontend
 
-Clean separation between frontend, backend, and AI logic
+Avoid unnecessary complexity
 
-The application follows a client–server architecture with all AI interactions handled server-side.
+All AI calls are made from the backend.
 
-Core Features
+Features
 Traveller
 
-Register and log in as a traveller
+Register and log in
 
-Browse hotels and available rooms
+Browse hotels and rooms
 
 Book rooms with check-in and check-out dates
 
-View and manage bookings
+View previous bookings
 
-Generate AI-powered travel itineraries for a booking
+Generate an itinerary for a booking
 
-Hotel Owner
+Hotel owner
 
-Separate login and role-based access
+Log in with a separate role
 
 Add and manage hotels
 
-Add room types and pricing
+Add rooms and pricing
 
-View bookings for owned properties
+View bookings for owned hotels
 
-AI Itinerary Generation
+AI itinerary
 
-Generates detailed, day-wise travel plans
+Generates a day-by-day travel plan
 
-Uses booking details as prompt context
+Uses booking details such as city and dates
 
-Controlled system prompt for consistent outputs
+Output is plain text and readable
 
-AI requests executed securely on the backend
+Implemented as a backend route
 
-AI Implementation Details
+AI implementation
 
-VoyageVista uses Hugging Face’s Chat Completion API for itinerary generation.
+The itinerary generation uses the Hugging Face chat completion API.
 
-Model
+Model used:
+
 meta-llama/Llama-3.2-1B-Instruct:novita
 
-How It Works
 
-Booking details are collected (city, dates, guests).
+How it works:
 
-Backend constructs a structured prompt.
+Booking details are fetched on the backend.
 
-A system instruction defines the model’s role as a travel planner.
+A system prompt defines the model as a travel planner.
 
-The model returns a readable, multi-day itinerary.
+A user prompt is created from booking data.
 
-The itinerary is rendered in the frontend itinerary page.
+The model returns a multi-day itinerary.
 
-Configuration
+The frontend displays the response as-is.
+
+Configuration:
 
 max_tokens: 1000
 
 temperature: 0.8
 
-Hugging Face API token stored in environment variables.
+The code for this lives in server/routes/aiRoutes.js.
 
-AI logic is implemented in server/routes/aiRoutes.js.
+Tech stack
 
-Tech Stack
-Frontend
+Frontend:
 
 React (Vite)
 
-React Router DOM
+React Router
 
 Axios
 
 Context API
 
-Custom CSS
-
-Backend
+Backend:
 
 Node.js
 
-Express.js
+Express
 
 MongoDB
 
@@ -109,97 +111,76 @@ JWT-based authentication
 
 Role-based authorization
 
-AI & External Services
+AI:
 
 Hugging Face Inference API
 
 LLaMA instruction model
 
-Project Structure
+Project structure
 VoyageVista/
-│
 ├── client/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── SelectRole.jsx
-│   │   │   ├── MyBookings.jsx
-│   │   │   ├── Itinerary.jsx
-│   │   │   └── hotelOwner/
-│   │   ├── context/
-│   │   ├── App.jsx
-│   │   └── main.jsx
+│   └── src/
+│       ├── pages/
+│       ├── context/
+│       ├── App.jsx
+│       └── main.jsx
 │
 ├── server/
 │   ├── routes/
-│   │   ├── aiRoutes.js
-│   │   ├── userRoutes.js
-│   │   ├── bookingRoutes.js
-│   │   ├── hotelRoutes.js
-│   │   └── roomRoutes.js
 │   ├── models/
 │   ├── middleware/
-│   │   └── authMiddleware.js
 │   └── server.js
 │
 └── README.md
 
-Environment Setup
+Environment variables
 
-Create a .env file inside the server/ directory:
+Create a .env file inside the server directory:
 
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
+MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 HF_TOKEN=your_huggingface_api_key
 
-Local Development
-Clone the repository
+Running the project locally
+
+Clone the repository:
+
 git clone https://github.com/abhayjeet5465/VoyageVista.git
 cd VoyageVista
 
-Start the backend
+
+Start the backend:
+
 cd server
 npm install
 npm run dev
 
-Start the frontend
+
+Start the frontend:
+
 cd client
 npm install
 npm run dev
 
-API Overview
-Generate AI Itinerary
+API
+
+Generate itinerary:
+
 POST /api/ai/itinerary
 
 
-Response
+Returns a text-based itinerary generated from booking details.
 
-{
-  "itinerary": "Day 1: Arrival and local exploration...\nDay 2: Sightseeing..."
-}
+Notes
 
-Design Notes
+AI logic is intentionally kept on the backend.
 
-AI requests are handled entirely on the backend to protect API keys.
+Prompts are simple and controlled.
 
-Role-based authorization ensures separation between traveller and hotel owner workflows.
-
-The AI layer is modular and can be updated without frontend changes.
-
-Future Improvements
-
-Structured itinerary output (JSON)
-
-Editable itineraries
-
-AI response caching
-
-Multi-language itinerary support
-
-Payment gateway integration
+The project focuses on correctness over polish.
 
 License
 
-This project is licensed under the MIT License.
+MIT
