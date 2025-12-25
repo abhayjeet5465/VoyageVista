@@ -1,74 +1,94 @@
 # VoyageVista
+
 ## Role-Based Travel Booking Application with AI-Generated Itineraries
-<img width="1896" height="914" alt="Screenshot 2025-12-07 215413" src="https://github.com/user-attachments/assets/9361deaa-28eb-41c2-90c5-5aefe74a79e1" />
 
-VoyageVista is a full-stack travel booking web application. Travellers can book hotels and generate AI-based travel itineraries. Hotel owners can manage hotels, rooms, and bookings through a separate role-based interface.
+VoyageVista is a MERN full-stack travel booking web application where travellers can book hotels and generate travel itineraries using AI. Hotel owners can log in with a separate role, add and manage hotels and rooms, and view bookings.
 
-AI itinerary generation is implemented on the backend using a Hugging Face LLaMA instruction model and real booking data.
+AI itinerary generation is handled on the backend using the Hugging Face LLaMA instruction model and booking details.
 
 ---
-<img width="1897" height="907" alt="Screenshot 2025-12-07 215435" src="https://github.com/user-attachments/assets/04bf1ef5-199c-48db-9ba3-0844c8150c26" />
-<img width="1896" height="914" alt="Screenshot 2025-12-07 215413" src="https://github.com/user-attachments/assets/3e6ed94b-e0e4-4fde-b2bf-19e7f1c33442" />
-<img width="1901" height="850" alt="Screenshot 2025-12-07 215355" src="https://github.com/user-attachments/assets/13243025-3a37-4023-bff7-b36b4203f2dd" />
-<img width="1902" height="716" alt="Screenshot 2025-12-07 215222" src="https://github.com/user-attachments/assets/19a8c060-920c-490d-bb69-c103bb93e77d" />
-<img width="929" height="608" alt="image" src="https://github.com/user-attachments/assets/a6b939ca-c5e1-4ddf-8738-e582bd2e12fd" />
-
 
 ## Overview
 
-VoyageVista models a realistic travel booking system with two distinct user roles and a backend-driven AI feature.
+VoyageVista models a travel booking system with role-based functionality and a backend AI feature. The focus is on:
 
-The project focuses on:
-- Clear separation of roles (traveller vs hotel owner)
-- Realistic booking workflows
-- Secure backend-only AI integration
-- Avoiding unnecessary abstraction and over-engineering
+- Clear separation of traveller and hotel owner functionality
+- Basic but realistic booking workflows
+- Backend-secured AI integration
+- Simple and readable project structure
 
-All AI requests are made from the backend.
+All AI requests are made from the backend to protect API credentials.
+
+---
+
+## Screenshots
+
+The following screenshots show the UI of different pages in the application.  
+
+<p align="center">
+  <img src="client/src/assets/Screenshot 2025-12-07 215355.png" width="500" alt="Home Page">
+</p>
+
+<p align="center">
+  <img src="client/src/assets/Screenshot 2025-12-07 215413.png" width="500" alt="Login Page">
+</p>
+
+<p align="center">
+  <img src="client/src/assets/Screenshot 2025-12-07 215435.png" width="500" alt="Booking Flow">
+</p>
+
+<p align="center">
+  <img src="client/src/assets/Screenshot 2025-12-25 200536.png" width="500" alt="AI Generated Itinerary">
+</p>
+
+> Update these paths if you later move the screenshots to a different folder.
 
 ---
 
 ## Features
 
 ### Traveller
-- Register and log in
-- Browse hotels and available rooms
-- Book rooms with check-in and check-out dates
+- Register and log in as a traveller
+- Browse hotels and view available rooms
+- Book rooms with check-in / check-out dates
 - View booking history
-- Generate an itinerary for a booking
+- Generate an AI itinerary for a booking
 
 ### Hotel Owner
-- Log in using a separate role
+- Log in with a separate role
 - Add and manage hotels
-- Add rooms and pricing
+- Add room types and pricing
 - View bookings for owned hotels
 
-### AI Itinerary Generation
-- Generates a day-by-day travel plan
-- Uses booking data such as city and dates
+### AI Itinerary
+- Produces day-by-day travel plans
+- Uses booking data such as location, dates, and guests
 - Output is plain text and readable
-- Implemented as a backend route
+- Implemented in a backend route
 
 ---
 
-## AI Implementation
+## AI Integration
 
-The itinerary generation uses the Hugging Face Chat Completion API.
+AI itinerary generation uses the Hugging Face Chat Completion API.
 
 ### Model
 
-### Flow
-1. Booking details are fetched on the backend.
-2. A system prompt defines the model as a travel planner.
-3. A user prompt is created from booking data.
+meta-llama/Llama-3.2-1B-Instruct:novita
+
+
+### How It Works
+1. The backend collects booking details.
+2. A system prompt defines the model’s role.
+3. A user prompt is constructed from booking data.
 4. The model returns a multi-day itinerary.
-5. The frontend renders the response.
+5. The frontend displays the response.
 
 ### Configuration
-- max_tokens: 1000
-- temperature: 0.8
+- `max_tokens`: 1000  
+- `temperature`: 0.8  
 
-AI logic is implemented in:
+The itinerary logic is implemented in:
 
 ---
 
@@ -86,16 +106,23 @@ AI logic is implemented in:
 - MongoDB
 - Mongoose
 - JWT authentication
-- Role-based authorization
+- Role-based authorization middleware
 
-### AI
+### AI / Services
 - Hugging Face Inference API
-- LLaMA instruction model
-  
+- LLaMA model
+
+---
+
 ## Project Structure
 VoyageVista/
 ├── client/
 │ └── src/
+│ ├── assets/
+│ │ ├── Screenshot 2025-12-07 215355.png
+│ │ ├── Screenshot 2025-12-07 215413.png
+│ │ ├── Screenshot 2025-12-07 215435.png
+│ │ └── Screenshot 2025-12-25 200536.png
 │ ├── pages/
 │ ├── context/
 │ ├── App.jsx
@@ -103,17 +130,24 @@ VoyageVista/
 │
 ├── server/
 │ ├── routes/
+│ │ ├── aiRoutes.js
+│ │ ├── bookingRoutes.js
+│ │ ├── hotelRoutes.js
+│ │ ├── roomRoutes.js
+│ │ └── userRoutes.js
 │ ├── models/
 │ ├── middleware/
 │ └── server.js
 │
 └── README.md
+---
+
 ## Environment Variables
 
-Create a `.env` file inside the `server` directory:
+Create a `.env` file in the `server` directory:
 
 PORT=5000
-MONGO_URI=your_mongodb_uri
+MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 HF_TOKEN=your_huggingface_api_key
 
@@ -121,54 +155,34 @@ yaml
 Copy code
 
 ---
+## Running the Project Locally
 
-## Running Locally
-
-Clone the repository:
+### Clone the repository
+```bash
 git clone https://github.com/abhayjeet5465/VoyageVista.git
 cd VoyageVista
-
-powershell
-Copy code
-
-Start the backend:
+Start the backend
 cd server
 npm install
 npm run dev
 
-powershell
-Copy code
-
-Start the frontend:
+Start the frontend
 cd client
 npm install
 npm run dev
 
-yaml
-Copy code
-
----
-
-## API
-
-### Generate Itinerary
+### API
+Generate AI Itinerary
 POST /api/ai/itinerary
+Returns a multi-day text itinerary based on the booking details sent in the payload.
 
-yaml
-Copy code
+Notes
+Backend-only AI logic protects keys and prompt design
 
-Returns a text-based itinerary generated from booking details.
+The AI flow is simple and focused on readability
 
----
+The project prioritizes clarity and correctness
 
-## Notes
-
-- AI logic is intentionally handled only on the backend.
-- Prompts are kept simple and controlled.
-- The project prioritizes correctness and clarity over polish.
-
----
-
-## License
+License
 
 MIT
