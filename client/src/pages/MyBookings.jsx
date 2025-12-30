@@ -9,6 +9,7 @@ const MyBookings = () => {
   const { axios, getToken, user } = useAppContext();
   const [bookings, setBookings] = useState([]);
 
+  // Fetch bookings
   const fetchUserBookings = async () => {
     try {
       const { data } = await axios.get("/api/bookings/user", {
@@ -20,13 +21,12 @@ const MyBookings = () => {
       } else {
         toast.error(data.message);
       }
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error.message || "Something went wrong";
-      toast.error(message);
+    } catch (err) {
+      toast.error("Failed to fetch bookings");
     }
   };
 
+  // Stripe payment
   const handlePayment = async (bookingId) => {
     try {
       const { data } = await axios.post(
@@ -37,169 +37,211 @@ const MyBookings = () => {
 
       if (data.success) {
         window.location.href = data.url;
-      } else {
-        toast.error(data.message);
       }
-    } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error.message ||
-        "Payment initiation failed";
-      toast.error(message);
+    } catch {
+      toast.error("Payment initiation failed");
     }
   };
 
+  // Cancel booking
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+
+    try {
+      const { data } = await axios.patch(
+        `/api/bookings/${bookingId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+
+      if (data.success) {
+        toast.success("Booking cancelled");
+
+        // Update local state
+        setBookings((prev) =>
+          prev.map((b) =>
+            b._id === bookingId ? { ...b, isCancelled: true } : b
+          )
+        );
+      }
+    } catch {
+      toast.error("Cancellation failed");
+    }
+  };
+
+  // Verify Stripe payment
   const verifyPayment = async (sessionId) => {
     try {
       const { data } = await axios.get(
         `/api/bookings/verify-payment/${sessionId}`,
-        {
-          headers: { Authorization: `Bearer ${await getToken()}` },
-        }
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
       );
 
       if (data.success && data.isPaid) {
-        toast.success("Payment successful!");
+        toast.success("Payment successful");
         window.history.replaceState({}, document.title, "/my-bookings");
         fetchUserBookings();
-      } else {
-        toast.error("Payment verification failed");
       }
-    } catch (error) {
-      toast.error("Failed to verify payment");
+    } catch {
+      toast.error("Payment verification failed");
     }
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserBookings();
+    if (!user) return;
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionId = urlParams.get("session_id");
+    fetchUserBookings();
 
-      if (sessionId) {
-        verifyPayment(sessionId);
-      }
-    }
+    const sessionId = new URLSearchParams(window.location.search).get(
+      "session_id"
+    );
+    if (sessionId) verifyPayment(sessionId);
   }, [user]);
 
   return (
-    <div className="py-28 md:pb-35 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32">
+    <div className="py-28 px-4 md:px-16 lg:px-24 xl:px-32">
       <Title
         title="My Bookings"
-        subTitle="Easily manage your past, current, and upcoming hotel reservations in one place. Plan your trips seamlessly with just a few clicks"
+        subTitle="Manage your past, current, and upcoming hotel reservations"
         align="left"
       />
 
-      <div className="max-w-6xl mt-8 w-full text-gray-800">
-        <div className="hidden md:grid md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 font-medium text-base py-3">
-          <div className="w-1/3">Hotels</div>
-          <div className="w-1/3">Date & Timings</div>
-          <div className="w-1/3">Payment</div>
+      <div className="max-w-6xl mt-8 text-gray-800">
+        <div className="hidden md:grid md:grid-cols-[3fr_2fr_1fr] border-b py-3 font-medium">
+          <div>Hotels</div>
+          <div>Date & Timings</div>
+          <div>Payment</div>
         </div>
 
-        {bookings.map((booking) => (
-          <div
-            key={booking._id}
-            className="grid grid-cols-1 md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 py-6 first:border-t"
-          >
-            {/* HOTEL SECTION */}
-            <div className="flex flex-col md:flex-row">
-              <img
-                className="min-md:w-44 rounded shadow object-cover"
-                src={booking.room.images[0]}
-                alt="hotel-img"
-              />
+        {bookings.map((booking) => {
+          const isCancelled = booking.isCancelled === true;
+          const isPaid = booking.isPaid === true;
 
-              <div className="flex flex-col gap-1.5 max-md:mt-3 min-md:ml-4">
-                <p className="font-playfair text-2xl">
-                  {booking.hotel.name}
-                  <span className="font-inter text-sm">
-                    {" "}
-                    ({booking.room.roomType})
-                  </span>
-                </p>
+          return (
+            <div
+              key={booking._id}
+              className="grid grid-cols-1 md:grid-cols-[3fr_2fr_1fr] border-b py-6"
+            >
+              {/* HOTEL */}
+              <div className="flex flex-col md:flex-row">
+                <img
+                  src={booking.room.images[0]}
+                  alt="hotel"
+                  className="md:w-44 rounded shadow object-cover"
+                />
 
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <img src={assets.locationIcon} alt="location-icon" />
-                  <span>{booking.hotel.address}</span>
+                <div className="md:ml-4 mt-3 md:mt-0 space-y-1">
+                  <p className="font-playfair text-2xl">
+                    {booking.hotel.name}
+                    <span className="text-sm">
+                      {" "}
+                      ({booking.room.roomType})
+                    </span>
+                  </p>
+
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <img src={assets.locationIcon} alt="" />
+                    {booking.hotel.address}
+                  </div>
+
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <img src={assets.guestsIcon} alt="" />
+                    Guests: {booking.guests}
+                  </div>
+
+                  <p>Total: ${booking.totalPrice}</p>
+                </div>
+              </div>
+
+              {/* DATES */}
+              <div className="flex gap-8 md:items-center mt-4 md:mt-0">
+                <div>
+                  <p>Check-In:</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(booking.checkInDate).toDateString()}
+                  </p>
+                </div>
+                <div>
+                  <p>Check-Out:</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(booking.checkOutDate).toDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* STATUS + ACTIONS */}
+              <div className="flex flex-col items-start justify-center mt-4 md:mt-0">
+                {/* STATUS */}
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`h-3 w-3 rounded-full ${
+                      isCancelled
+                        ? "bg-gray-400"
+                        : isPaid
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                  />
+                  <p
+                    className={`text-sm ${
+                      isCancelled
+                        ? "text-gray-400"
+                        : isPaid
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {isCancelled ? "Cancelled" : isPaid ? "Paid" : "Unpaid"}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <img src={assets.guestsIcon} alt="guests-icon" />
-                  <span>Guests: {booking.guests}</span>
-                </div>
+                {/* PAY */}
+                {!isCancelled && !isPaid && (
+                  <button
+                    onClick={() => handlePayment(booking._id)}
+                    className="mt-3 w-full max-w-[200px] px-4 py-1.5 text-xs border rounded-full hover:bg-gray-50"
+                  >
+                    Pay Now
+                  </button>
+                )}
 
-                <p className="text-base">Total: ${booking.totalPrice}</p>
+                {/* CANCEL */}
+                {!isCancelled &&
+                  new Date(booking.checkInDate) > new Date() && (
+                    <button
+                      onClick={() => handleCancelBooking(booking._id)}
+                      className="mt-2 w-full max-w-[200px] px-4 py-1.5 text-xs border border-red-400 text-red-500 rounded-full hover:bg-red-50"
+                    >
+                      Cancel Booking
+                    </button>
+                  )}
+
+                {/* AI ITINERARY */}
+                {!isCancelled && (
+                  <Link
+                    to={`/itinerary/${booking._id}`}
+                    state={{
+                      booking: {
+                        hotelName: booking.hotel.name,
+                        city: booking.hotel.address,
+                        checkIn: booking.checkInDate,
+                        checkOut: booking.checkOutDate,
+                        guests: booking.guests,
+                        roomType: booking.room.roomType,
+                      },
+                    }}
+                    className="mt-3 w-full max-w-[200px] text-center bg-purple-600 text-white px-5 py-2 rounded-full text-sm hover:bg-purple-700"
+                  >
+                    AI Itinerary
+                  </Link>
+                )}
               </div>
             </div>
-
-            {/* DATE SECTION */}
-            <div className="flex flex-row md:items-center md:gap-12 mt-3 gap-8">
-              <div>
-                <p>Check-In:</p>
-                <p className="text-gray-500 text-sm">
-                  {new Date(booking.checkInDate).toDateString()}
-                </p>
-              </div>
-
-              <div>
-                <p>Check-Out:</p>
-                <p className="text-gray-500 text-sm">
-                  {new Date(booking.checkOutDate).toDateString()}
-                </p>
-              </div>
-            </div>
-
-            {/* PAYMENT + AI SECTION */}
-            <div className="flex flex-col items-start justify-center pt-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`h-3 w-3 rounded-full ${
-                    booking.isPaid ? "bg-green-500" : "bg-red-500"
-                  }`}
-                ></div>
-                <p
-                  className={`text-sm ${
-                    booking.isPaid ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {booking.isPaid ? "Paid" : "Unpaid"}
-                </p>
-              </div>
-
-              {!booking.isPaid && (
-                <button
-                  onClick={() => handlePayment(booking._id)}
-                  className="px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer"
-                >
-                  Pay Now
-                </button>
-              )}
-
-              {/* AI ITINERARY BUTTON (FIXED — STATE PASSED!) */}
-              <Link
-                to={`/itinerary/${booking._id}`}
-                state={{
-                  booking: {
-                    hotelName: booking.hotel.name,
-                    city: booking.hotel.address,
-                    checkIn: booking.checkInDate,
-                    checkOut: booking.checkOutDate,
-                    guests: booking.guests,
-                    roomType: booking.room.roomType,
-                  },
-                }}
-                className="mt-3 inline-block bg-purple-600 text-white px-6 py-2 rounded-full text-sm font-medium shadow hover:bg-purple-700 transition-all"
-              >
-                AI Itinerary
-              </Link>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
-};
+};``
 
 export default MyBookings;

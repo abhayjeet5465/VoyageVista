@@ -9,8 +9,9 @@ import mongoose from "mongoose";
 const checkAvailability = async ({ checkInDate, checkOutDate, room }) => {
 
   try {
-    const bookings = await Booking.find({
+    const bookings = await Booking.find({ 
       room,
+      isCancelled: false,
       checkInDate: { $lte: checkOutDate },
       checkOutDate: { $gte: checkInDate },
     });
