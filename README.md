@@ -6,6 +6,7 @@ VoyageVista is a full-stack travel booking web application. Travellers can book 
 
 AI itinerary generation is handled on the backend using a Hugging Face LLaMA instruction model and real booking data.
 
+
 ---
 
 ## Overview
